@@ -9,13 +9,12 @@ import tkinter.simpledialog
 
 case=get_current('Case')
 case.TreatmentPlans['SPECT Scaled'].TreatmentCourse.TotalDose.UpdateDoseGridStructures()
-#case.TreatmentPlans['PET Scaled'].TreatmentCourse.TotalDose.UpdateDoseGridStructures()
+# case.TreatmentPlans['PET Scaled'].TreatmentCourse.TotalDose.UpdateDoseGridStructures()
 plan=case.TreatmentPlans['SPECT Scaled']
-# Utiliza el plan del estudio de referencia, donde se han guardado todas las ROI, independientemente de la dosis que hayan utilizado
 plan_dose = plan.TreatmentCourse.TotalDose
 
 
-def copy(event):
+def copy(event): # So that the contents of the pop-upo window can be copied using the keyboard shortcuts
     sel = tree.selection() # get selected items
     root.clipboard_clear()  # clear clipboard
     # copy headers
@@ -33,8 +32,7 @@ def copy(event):
 root = tk.Tk()
 root.title('Results (copy to clipboard wih Ctrl + A and Ctrl + C)')
 tree = ttk.Treeview(root)
-tree.bind('<Control-a>', lambda *args: tree.selection_add(tree.get_children())) #selected all row treeview
-tree.bind('<Control-c>', copy)
+
 
 tree['columns'] = ('10', '20', '30','40','50','60','70','80','90')
 tree.column('#0', width=350, stretch=tk.NO)
@@ -70,18 +68,17 @@ with CompositeAction('SPECT ROIs'):
 	av_dosev=tuple()
 	for j in range(initial,final,step):
 	
-		try:#para que ignore los errores si hay algún valor vacío (especialmente si no existe coiincidencia entre la ROI prescrita y la administrada)
-			
+		try:
 			c=str(j)+'S'
-			# Valor del volumen redondeando al segundo decimal
+			# The results are rounded to the second decimal place
 			vol_val=str(round(plan.BeamSets[0].GetStructureSet().RoiGeometries[c].GetRoiVolume(),2))
 			volv=volv+(vol_val,)
 			dose=str(round(plan_dose.GetDoseStatistic(RoiName=c, DoseType="Average")/100,2))
-			# Recuerda que hay que dividirlo entre 100 porque las odis que maneja multiplican por 100 el valor del voxel
+			# The dose value stored in the map has cGy units
 			av_dosev=av_dosev+(dose,)
 		
 		
-		except:#para que ignore los errores si hay algún valor vacío (especialmente si no existe coincidencia entre la ROI prescrita y la administrada)
+		except:
 			volv=volv+("-",)
 			av_dosev=av_dosev+("-",)
 	tree.insert('', 'end', text='Pre-treatment (SPECT) volume (cc)',values=volv)
@@ -95,15 +92,13 @@ with CompositeAction('PET ROIs'):
 		try:#para que ignore los errores si hay algún valor vacío (especialmente si no existe coiincidencia entre la ROI prescrita y la administrada)
 		
 			c=str(j)+'P'
-			# Valor del volumen redondeando al segundo decimal
 			vol_val=str(round(plan.BeamSets[0].GetStructureSet().RoiGeometries[c].GetRoiVolume(),2))
 			volv=volv+(vol_val,)
 			dose=str(round(plan_dose.GetDoseStatistic(RoiName=c, DoseType="Average")/100,2))
-			# Recuerda que hay que dividirlo entre 100 porque las odis que maneja multiplican por 100 el valor del voxel
 			av_dosev=av_dosev+(dose,)
 		
 		
-		except:#para que ignore los errores si hay algún valor vacío (especialmente si no existe coincidencia entre la ROI prescrita y la administrada)
+		except:
 			volv=volv+("-",)
 			av_dosev=av_dosev+("-",)
 	tree.insert('', 'end', text='Post-treatment (PET) volume (cc)',values=volv)
@@ -114,18 +109,14 @@ with CompositeAction('ROIs en las que coincide la dosis prescrita y la administr
 	av_dosev=tuple()
 	for j in range(initial,final,step):
 		
-		try:#para que ignore los errores si hay algún valor vacío (especialmente si no existe coiincidencia entre la ROI prescrita y la administrada)
-		
+		try:
 			c=str(j)+str(" over.")
-			# Valor del volumen redondeando al segundo decimal
 			vol_val=str(round(plan.BeamSets[0].GetStructureSet().RoiGeometries[c].GetRoiVolume(),2))
 			volv=volv+(vol_val,)
 			dose=str(round(plan_dose.GetDoseStatistic(RoiName=c, DoseType="Average")/100,2))
-			# Recuerda que hay que dividirlo entre 100 porque las odis que maneja multiplican por 100 el valor del voxel
 			av_dosev=av_dosev+(dose,)
-			
 		
-		except:#para que ignore los errores si hay algún valor vacío (especialmente si no existe coincidencia entre la ROI prescrita y la administrada)
+		except:
 			volv=volv+("-",)
 			av_dosev=av_dosev+("-",)
 	tree.insert('', 'end', text='Overlapping pre- and post-treatment volume (cc)',values=volv)
@@ -135,18 +126,14 @@ with CompositeAction('Non-prescribed administered ROIs'):
 	volv=tuple()
 	av_dosev=tuple()
 	for j in range(initial,final,step):
-		try:#para que ignore los errores si hay algún valor vacío (especialmente si no existe coiincidencia entre la ROI prescrita y la administrada)
-		
+		try:
 			c=str(str(j)+" non over.")
-			# Valor del volumen redondeando al segundo decimal
 			vol_val=str(round(plan.BeamSets[0].GetStructureSet().RoiGeometries[c].GetRoiVolume(),2))
 			volv=volv+(vol_val,)
 			dose=str(round(plan_dose.GetDoseStatistic(RoiName=c, DoseType="Average")/100,2))
-			# Recuerda que hay que dividirlo entre 100 porque las odis que maneja multiplican por 100 el valor del voxel
 			av_dosev=av_dosev+(dose,)
 		
-		
-		except:#para que ignore los errores si hay algún valor vacío (especialmente si no existe coincidencia entre la ROI prescrita y la administrada)
+		except:
 			volv=volv+("-",)
 			av_dosev=av_dosev+("-",)
 	tree.insert('', 'end', text='Non-overlapping volume (cc)',values=volv)
