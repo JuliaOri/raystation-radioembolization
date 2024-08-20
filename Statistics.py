@@ -116,7 +116,7 @@ with CompositeAction('ROIs en las que coincide la dosis prescrita y la administr
 		
 		try:#para que ignore los errores si hay algún valor vacío (especialmente si no existe coiincidencia entre la ROI prescrita y la administrada)
 		
-			c=str(j)+str(" pres.")
+			c=str(j)+str(" over.")
 			# Valor del volumen redondeando al segundo decimal
 			vol_val=str(round(plan.BeamSets[0].GetStructureSet().RoiGeometries[c].GetRoiVolume(),2))
 			volv=volv+(vol_val,)
@@ -137,7 +137,7 @@ with CompositeAction('Non-prescribed administered ROIs'):
 	for j in range(initial,final,step):
 		try:#para que ignore los errores si hay algún valor vacío (especialmente si no existe coiincidencia entre la ROI prescrita y la administrada)
 		
-			c=str(str(j)+" non pres.")
+			c=str(str(j)+" non over.")
 			# Valor del volumen redondeando al segundo decimal
 			vol_val=str(round(plan.BeamSets[0].GetStructureSet().RoiGeometries[c].GetRoiVolume(),2))
 			volv=volv+(vol_val,)
