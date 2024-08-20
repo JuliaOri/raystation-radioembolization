@@ -7,12 +7,13 @@ import tkinter as tk
 from connect import *
 
 case=get_current("Case")
-ExNames=case.Examinations._#List all the examinations
-nEx = len(ExNames.split())#Count the total number of examinations
+ExNames=case.Examinations._ #List all the examinations
+nEx = len(ExNames.split()) #Count the total number of examinations
 Names=[]
 for i in range(0,nEx):
 	Names.append(case.Examinations[i].Name)
-	
+
+# The following windows allow for SPECT and PET image (examination) selection	
 def ComboboxSelection():
     app = tk.Tk()
     app.title("Select the examinations")
@@ -40,7 +41,7 @@ class ComboboxSelectionWindow():
         self.comboBox_example_contents=self.comboBox_example.get()
         self.master.destroy()
 
-ES=ComboboxSelection()
+ES=ComboboxSelection() # SPECT examination's name
 
 
 class ComboboxSelectionWindow():
@@ -61,7 +62,7 @@ class ComboboxSelectionWindow():
         self.comboBox_example_contents=self.comboBox_example.get()
         self.master.destroy()
 
-EP=ComboboxSelection()
+EP=ComboboxSelection() #PET examination's name
 
 with CompositeAction("Get the plans that use the PET and SPECT examinations"):
 	PlanNames = case.TreatmentPlans._ 
@@ -125,26 +126,28 @@ with CompositeAction('Normalize the dose maps to the maximum value'):
 	if (PPExists==0):
 		case.TreatmentPlans[PP].BeamSets[PP].ScaleToDoseGoal(DspName=None, RoiName="External PET", DoseValue=10000, DoseVolume=0,\
 		PrescriptionType="DoseAtVolume", LockedBeamNames=None, EvaluateOptimizationFunctionsAfterScaling=True, IncludeBackgroundDose=False)
-		
+# After the PET's dose is deformed using the deformable registration, the maximum dose value may change in the "PET Scaled" deformed evaluation dose. To avoid any issues, 
+# the threshold values will be normalized again when creating the ROIs further down the script
+
 with CompositeAction('Check if a frame of reference between the SPECT and PET examinations already exists'):
 	Names = case.StructureRegistrations._ 
 	nFOR = len(Names.split()) 
 	FORIndex=-1
 	fo=0
 	for fo in range(0,nFOR):
-	#The "case.Registration._" function doesn't work, so the FoR names are obtained from the "case.StructureRegistrations.-" objects, using the "FromExamination" function"
-		fromname=case.StructureRegistrations[fo].FromExamination.Name#Must be the SPECT examination (ES)
-		toname=case.StructureRegistrations[fo].ToExamination.Name#Must be the PET examination (EP)
-		grid=case.StructureRegistrations[fo].DeformationGrid.FrameOfReference#Defomaion grid corresponding to a deformable registration
+	#The "case.Registration._" function doesn't work, so the FoR names are obtained from the "case.StructureRegistrations.-" objects, using the "FromExamination" and "ToExaminaition" function
+		fromname=case.StructureRegistrations[fo].FromExamination.Name #Must be the SPECT examination (ES)
+		toname=case.StructureRegistrations[fo].ToExamination.Name #Must be the PET examination (EP)
+		grid=case.StructureRegistrations[fo].DeformationGrid.FrameOfReference #Defomaion grid corresponding to a deformable registration
 		if(fromname==ES and toname==EP and grid==""):#The last condition ensures that only the 'Source registration' registrations are picked
-			FORIndex=fo	
+			FORIndex=fo # Frame of reference index. If the FoR doesn't already exist, the index value will be -1	
 			
 with CompositeAction('Create a rigid registration if necessary'):		
 	if(FORIndex==-1):
 		case.CreateNamedIdentityFrameOfReferenceRegistration(FromExaminationName=EP, ToExaminationName=ES, RegistrationName="FoR PET to SPECT", \
 		Description=None)
 	
-			#Image registration
+		#Image registration
 		case.ComputeGrayLevelBasedRigidRegistration(FloatingExaminationName=EP, ReferenceExaminationName=ES, RegistrationName=None, \
 		UseOnlyTranslations=False, HighWeightOnBones=True, InitializeImages=True, FocusRoisNames=[])
 
@@ -152,9 +155,9 @@ with CompositeAction('Check for radioembolization deformable registrations (DefR
 	RegGr=case.PatientModel.StructureRegistrationGroups._
 	nRegGr = len(RegGr.split()) 
 	gr=0
-	RegGroupExists=-1# if RegGrIndex==-1 there isn't any deformable registration with the "DefRegRemb" name
+	RegGroupExists=-1 # if RegGrIndex==-1 there isn't any deformable registration with the "DefRegRemb" name
 	nRegDef=-1
-	while gr < nRegGr:#This assigns a free index to the new registration group
+	while gr < nRegGr: #This assigns a free index to the new registration group
 		RegGrTitle=case.PatientModel.StructureRegistrationGroups[gr].Name
 		if ('DefRegRemb' in RegGrTitle):
 			RegGroupExists=gr+1 
@@ -162,22 +165,23 @@ with CompositeAction('Check for radioembolization deformable registrations (DefR
 		gr+=1
 
 with CompositeAction('Create a deformable regristration with a new index'):	
-		GrName=str("DefRegRemb")
-		DefName=str("DefRegRemb1")
+	GrName=str("DefRegRemb")
+	DefName=str("DefRegRemb1")
+	
+	if(RegGroupExists==-1):#If a deformabele registration doesn't exist
+		case.PatientModel.CreateHybridDeformableRegistrationGroup(RegistrationGroupName=GrName, ReferenceExaminationName=ES, \
+		TargetExaminationNames=[EP], ControllingRoiNames=[], ControllingPoiNames=[], FocusRoiNames=[], \
+		AlgorithmSettings={ 'NumberOfResolutionLevels': 3, 'InitialResolution': { 'x': 0.5, 'y': 0.5, 'z': 0.5 }, \
+		'FinalResolution': { 'x': 0.25, 'y': 0.25, 'z': 0.25 }, 'InitialGaussianSmoothingSigma': 2, 'FinalGaussianSmoothingSigma': 0.333333333333333, \
+		'InitialGridRegularizationWeight': 400, 'FinalGridRegularizationWeight': 400, 'ControllingRoiWeight': 0.5, 'ControllingPoiWeight': 0.1, \
+		'MaxNumberOfIterationsPerResolutionLevel': 1000, 'ImageSimilarityMeasure': "MutualInformation", 'DeformationStrategy': "Default", \
+		'ConvergenceTolerance': 1E-05 })
 		
-		if(RegGroupExists==-1):#If a deformabele registration doesn't exist
-			case.PatientModel.CreateHybridDeformableRegistrationGroup(RegistrationGroupName=GrName, ReferenceExaminationName=ES, \
-			TargetExaminationNames=[EP], ControllingRoiNames=[], ControllingPoiNames=[], FocusRoiNames=[], \
-			AlgorithmSettings={ 'NumberOfResolutionLevels': 3, 'InitialResolution': { 'x': 0.5, 'y': 0.5, 'z': 0.5 }, \
-			'FinalResolution': { 'x': 0.25, 'y': 0.25, 'z': 0.25 }, 'InitialGaussianSmoothingSigma': 2, 'FinalGaussianSmoothingSigma': 0.333333333333333, \
-			'InitialGridRegularizationWeight': 400, 'FinalGridRegularizationWeight': 400, 'ControllingRoiWeight': 0.5, 'ControllingPoiWeight': 0.1, \
-			'MaxNumberOfIterationsPerResolutionLevel': 1000, 'ImageSimilarityMeasure': "MutualInformation", 'DeformationStrategy': "Default", \
-			'ConvergenceTolerance': 1E-05 })
-			
-			beam_pet=case.TreatmentPlans[PP].BeamSets[PP]
-			case.MapDose(FractionNumber=0, SetTotalDoseEstimateReference=True, DoseDistribution=beam_pet.FractionDose,\
-			StructureRegistration=case.StructureRegistrations[DefName], ReferenceDoseGrid=None)
-			case.TreatmentPlans[PS].TreatmentCourse.TotalDose.UpdateDoseGridStructures()
+		# Deform the "PET Scaled" dose map using the deformation registration
+		beam_pet=case.TreatmentPlans[PP].BeamSets[PP]
+		case.MapDose(FractionNumber=0, SetTotalDoseEstimateReference=True, DoseDistribution=beam_pet.FractionDose,\
+		StructureRegistration=case.StructureRegistrations[DefName], ReferenceDoseGrid=None)
+		case.TreatmentPlans[PS].TreatmentCourse.TotalDose.UpdateDoseGridStructures()
 			
 # Update dose statistics
 case.TreatmentPlans[PS].TreatmentCourse.TotalDose.UpdateDoseGridStructures()
@@ -216,6 +220,8 @@ with CompositeAction('Create the PET and SPECT threshold dose ROIs'):
 	examination=case.Examinations[ES] 
 	plan=case.TreatmentPlans[PS]
 	plan_dose_pet=case.TreatmentDelivery.FractionEvaluations[0].DoseOnExaminations[DoseOnExSPECTIndex].DoseEvaluations[DoseEvRembIndex]
+	# As the PET maximum dose value may change after the dose map is deformed, this will ensure the threshold values are normalized to 
+	# the new maximum value
 	dosemax=plan_dose_pet.GetDoseStatistic(RoiName="External PET", DoseType="Max")
 	# The created ROIs with range from 10 to 90% of the maximum dose, by steps of 10%
 	initial = 10
@@ -249,9 +255,9 @@ with CompositeAction('Create the PET and SPECT threshold dose ROIs'):
 		except:
 			print("SPECT ROI already exists") 
 
-		# Prescribed administrered ROIs
+		# Overlapping ROIs
 		try:
-			name_over=str(j)+' pres.'
+			name_over=str(j)+' over.'
 			name_s=str(str(j)+"S")
 			name_p=str(str(j)+"P")		
 			roi_int = case.PatientModel.CreateRoi(Name=name_over, Color="White", Type="Organ", TissueName=None, RbeCellTypeName=None, RoiMaterial=None)
@@ -267,11 +273,11 @@ with CompositeAction('Create the PET and SPECT threshold dose ROIs'):
 			'Posterior': 0, 'Right': 0, 'Left': 0 })
 			roi_int.UpdateDerivedGeometry(Examination=examination, Algorithm="Auto")
 		except:
-			print('Prescribed ROI already exists')
+			print('Overlapping ROI already exists')
 		
-		# Non-prescribed administrered ROIs
+		# Non-overlapping ROIs
 		try:
-			name_subs=str(str(j)+" non pres.")
+			name_subs=str(str(j)+" non over.")
 			roi_np = case.PatientModel.CreateRoi(Name=name_subs, Color="Red", Type="Organ", TissueName=None, RbeCellTypeName=None, RoiMaterial=None)
 	   
 			# The type of operation is called "Substraction". Expression B (SPECT) is substracted from expression A (PET)
@@ -290,7 +296,7 @@ with CompositeAction('Create the PET and SPECT threshold dose ROIs'):
 	  
 			
 		except:
-			print('Non-prescribed ROI already exists')
+			print('Non-overlapping ROI already exists')
 			
 		plan.TreatmentCourse.TotalDose.UpdateDoseGridStructures()
 		
@@ -300,12 +306,12 @@ with CompositeAction('Image registration verification'):
 	max=len(m)
 	invalid=0
 	for i in range(0,max,1):
-		if (m[i]<=0):
+		if (m[i]<0):
 			invalid=invalid+1
 	def ok():
 		root.destroy()
 		
-	texto=str("Total numbers of voxels: "+str(max)+"\n \nInvalid voxels (Jacobian determinant <=0): "+str(invalid)+"\n ")
+	texto=str("Total numbers of voxels: "+str(max)+"\n \nInvalid voxels (Jacobian determinant < 0): "+str(invalid)+"\n ")
 	root = Tk()
 	root.geometry('350x120')
 	root.title("Image verification")
