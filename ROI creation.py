@@ -5,11 +5,6 @@ from tkinter import ttk
 from tkinter import *
 import tkinter as tk
 from connect import *
-
-def UpdateProgessbar(ProgText):
-	progressbar.step(10)
-	ProgLabel.config(text = ProgText)
-	prog.update()
 	
 def MyRoi(RoiName, RoiColor, RoiType, RoiThreshold, Plan, PlanDose):
 	try: 
@@ -59,6 +54,7 @@ def ComboboxSelection():
 	geo=str(str(w)+'x'+str(h)+'+'+str(screen_width)+'+'+str(screen_height))
 	app.geometry(geo)
 	app.attributes("-topmost", True)
+	app.overrideredirect(True)
 	Selection=ComboboxSelectionWindow(app)
 	app.mainloop()
 	
@@ -106,7 +102,11 @@ class ComboboxSelectionWindow():
 EP=ComboboxSelection() #PET examination's name
 
 with CompositeAction("Progress window"):
-
+	def UpdateProgessbar(ProgText):
+		progressbar.step(10)
+		ProgLabel.config(text = ProgText)
+		prog.update()
+		
 	prog = tk.Tk()
 	w=350
 	h=120
@@ -115,13 +115,17 @@ with CompositeAction("Progress window"):
 	geo=str(str(w)+'x'+str(h)+'+'+str(screen_width)+'+'+str(screen_height))
 	prog.title("Progress")
 	prog.attributes("-topmost", True)
+	prog.overrideredirect(True)
+	#prog.attributes("-alpha", 0.6)
 	prog.geometry(geo)
 	ProgText="Running script..."
 	ProgLabel = tk.Label(prog,text = ProgText,justify="center")
-	ProgLabel.pack(pady=15, padx=30, anchor="w")
+	ProgLabel.pack(pady=20, padx=30, anchor="w")
 	progressbar = ttk.Progressbar(length=280)
-	progressbar.pack(pady=10, padx=30, anchor="w")
+	progressbar.pack(pady=5, padx=30, anchor="w")
 	UpdateProgessbar("Running script...")
+	
+
 
 with CompositeAction("Get the plans that use the PET and SPECT examinations"):
 	PlanNames = case.TreatmentPlans._ 
@@ -348,20 +352,20 @@ with CompositeAction('Image registration verification'):
 	
 	UpdateProgessbar('Image registration finished')
 	prog.destroy()
-	root = Tk()
+	ver = tk.Tk()
 	w=350
 	h=160
-	screen_width = int(root.winfo_screenwidth()/2-(w/2))
-	screen_height = int(root.winfo_screenheight()/2-(h/2))
+	screen_width = int(ver.winfo_screenwidth()/2-(w/2))
+	screen_height = int(ver.winfo_screenheight()/2-(h/2))
 	geo=str(str(w)+'x'+str(h)+'+'+str(screen_width)+'+'+str(screen_height))
-	root.geometry(geo)
-	root.title("Image verification")
-	root.attributes("-topmost", True)
+	ver.geometry(geo)
+	ver.title("Image verification")
+	ver.attributes("-topmost", True)
 	var = StringVar()
-	label = Message(root, textvariable=var,width=700)
+	label = Message(ver, textvariable=var,width=700)
 	var.set(texto)
 	label.pack()
-	root.okButton = tk.Button(root, text='Close',command = ok)
-	root.okButton.place(x = 105, y = 0, width=140, height=25)
-	root.okButton.pack()
-	root.mainloop()
+	ver.okButton = tk.Button(ver, text='Close',command = ok)
+	ver.okButton.place(x = 105, y = 0, width=140, height=25)
+	ver.okButton.pack()
+	ver.mainloop()
