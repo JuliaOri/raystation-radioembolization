@@ -1,5 +1,6 @@
 from connect import *
 import warnings
+
 from tkinter import ttk
 from tkinter import *
 import tkinter as tk
@@ -159,7 +160,7 @@ with CompositeAction('Check for radioembolization deformable registrations (DefR
 	while gr < nRegGr: #This assigns a free index to the new registration group
 		RegGrTitle=case.PatientModel.StructureRegistrationGroups[gr].Name
 		if ('DefRegRemb' in RegGrTitle):
-			RegGroupExists=gr+1 
+			RegGroupExists=gr 
 			break
 		gr+=1
 
@@ -175,16 +176,8 @@ with CompositeAction('Create a deformable regristration with a new index'):
 		'InitialGridRegularizationWeight': 400, 'FinalGridRegularizationWeight': 400, 'ControllingRoiWeight': 0.5, 'ControllingPoiWeight': 0.1, \
 		'MaxNumberOfIterationsPerResolutionLevel': 1000, 'ImageSimilarityMeasure': "MutualInformation", 'DeformationStrategy': "Default", \
 		'ConvergenceTolerance': 1E-05 })
-		
-		# Deform the "PET Scaled" dose map using the deformation registration
-		beam_pet=case.TreatmentPlans[PP].BeamSets[PP]
-		case.MapDose(FractionNumber=0, SetTotalDoseEstimateReference=True, DoseDistribution=beam_pet.FractionDose,\
-		StructureRegistration=case.StructureRegistrations[DefName], ReferenceDoseGrid=None)
-		case.TreatmentPlans[PS].TreatmentCourse.TotalDose.UpdateDoseGridStructures()
-			
-# Update dose statistics
-case.TreatmentPlans[PS].TreatmentCourse.TotalDose.UpdateDoseGridStructures()
-case.TreatmentPlans[PP].TreatmentCourse.TotalDose.UpdateDoseGridStructures()
+
+
 
 with CompositeAction('Find the deformed PET dose map index'):
 	DoseOnEx=case.TreatmentDelivery.FractionEvaluations[0]
@@ -192,6 +185,7 @@ with CompositeAction('Find the deformed PET dose map index'):
 	nDoseOnEx = len(DoseOnExNames.split()) 
 	DoseOnExSPECTIndex=0 
 	ex=0
+	DoseEvPlanExists=-1 #to check and obtain the index of the 'PET Scaled' deformed dose
 	while ex < nDoseOnEx:
 		DoseOnExTitle=DoseOnEx.DoseOnExaminations[ex].OnExamination.Name
 		if len(DoseOnExTitle)==0:
@@ -206,15 +200,31 @@ with CompositeAction('Find the deformed PET dose map index'):
 			ev=0
 			while ev<nDoseEv:
 				DoseEvTitle=DoseOnExSPECT.DoseEvaluations[ev].ByStructureRegistration.Name
+				DoseEvPlan=DoseOnExSPECT.DoseEvaluations[ev].OfDoseDistribution.ForBeamSet.DicomPlanLabel
 				if len(DoseEvTitle)==0:
 					ev+=1
-				if DoseEvTitle == DefName:
+				if DoseEvTitle == DefName and DoseEvPlan == PP:
 					DoseEvRembIndex=ev
+					DoseEvPlanExists=1
 					break
 					break
 			ev+=1
 		ex += 1	
-		
+
+
+with CompositeAction("Deform PET's dose map"):
+	if DoseEvPlanExists ==-1: 
+		# Deform the "PET Scaled" dose map using the deformation registration
+		beam_pet=case.TreatmentPlans[PP].BeamSets[PP]
+		case.MapDose(FractionNumber=0, SetTotalDoseEstimateReference=True, DoseDistribution=beam_pet.FractionDose,\
+		StructureRegistration=case.StructureRegistrations[DefName], ReferenceDoseGrid=None)
+		case.TreatmentPlans[PS].TreatmentCourse.TotalDose.UpdateDoseGridStructures()
+	else:
+		print("'PET Scaled' dose map already deformed")
+# Update dose statistics
+case.TreatmentPlans[PS].TreatmentCourse.TotalDose.UpdateDoseGridStructures()
+case.TreatmentPlans[PP].TreatmentCourse.TotalDose.UpdateDoseGridStructures()
+
 with CompositeAction('Create the PET and SPECT threshold dose ROIs'):
 	examination=case.Examinations[ES] 
 	plan=case.TreatmentPlans[PS]
@@ -322,6 +332,3 @@ with CompositeAction('Image registration verification'):
 	root.okButton.place(x = 105, y = 20, width=140, height=25)
 	root.okButton.pack()
 	root.mainloop()
-	
-    
-	
