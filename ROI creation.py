@@ -151,7 +151,7 @@ with CompositeAction('Create a rigid registration if necessary'):
 		case.ComputeGrayLevelBasedRigidRegistration(FloatingExaminationName=EP, ReferenceExaminationName=ES, RegistrationName=None, \
 		UseOnlyTranslations=False, HighWeightOnBones=True, InitializeImages=True, FocusRoisNames=[])
 
-with CompositeAction('Check for radioembolization deformable registrations (DefRegRemb)'):	
+with CompositeAction('Check for radioembolization deformable registrations (DefRegRadioembolization)'):	
 	RegGr=case.PatientModel.StructureRegistrationGroups._
 	nRegGr = len(RegGr.split()) 
 	gr=0
@@ -159,14 +159,14 @@ with CompositeAction('Check for radioembolization deformable registrations (DefR
 	nRegDef=-1
 	while gr < nRegGr: #This assigns a free index to the new registration group
 		RegGrTitle=case.PatientModel.StructureRegistrationGroups[gr].Name
-		if ('DefRegRemb' in RegGrTitle):
+		if ('DefRegRadioembolization' in RegGrTitle):
 			RegGroupExists=gr 
 			break
 		gr+=1
 
 with CompositeAction('Create a deformable regristration with a new index'):	
-	GrName=str("DefRegRemb")
-	DefName=str("DefRegRemb1")
+	GrName=str("DefRegRadioembolization")
+	DefName=str("DefRegRadioembolization1")
 	
 	if(RegGroupExists==-1):#If a deformabele registration doesn't exist
 		case.PatientModel.CreateHybridDeformableRegistrationGroup(RegistrationGroupName=GrName, ReferenceExaminationName=ES, \
