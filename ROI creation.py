@@ -44,9 +44,15 @@ for i in range(0,nEx):
 
 # The following windows allow for SPECT and PET image (examination) selection	
 def ComboboxSelection():
+
 	app = tk.Tk()
+	w=350
+	h=120
+	screen_width = int(app.winfo_screenwidth()/2-(w/2))
+	screen_height = int(app.winfo_screenheight()/2-(h/2))
 	app.title("Select the examinations")
-	app.geometry('350x120')
+	geo=str(str(w)+'x'+str(h)+'+'+str(screen_width)+'+'+str(screen_height))
+	app.geometry(geo)
 	app.attributes("-topmost", True)
 	Selection=ComboboxSelectionWindow(app)
 	app.mainloop()
@@ -310,7 +316,12 @@ with CompositeAction('Image registration verification'):
 		+"\n \nInvalid voxels (Jacobian determinant < 0): "+str(invalid)+"\n\nThe image registration is NOT valid\n")
 	
 	root = Tk()
-	root.geometry('350x160')
+	w=350
+	h=160
+	screen_width = int(root.winfo_screenwidth()/2-(w/2))
+	screen_height = int(root.winfo_screenheight()/2-(h/2))
+	geo=str(str(w)+'x'+str(h)+'+'+str(screen_width)+'+'+str(screen_height))
+	root.geometry(geo)
 	root.title("Image verification")
 	root.attributes("-topmost", True)
 	var = StringVar()
