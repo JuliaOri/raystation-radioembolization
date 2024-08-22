@@ -6,6 +6,11 @@ from tkinter import *
 import tkinter as tk
 from connect import *
 
+def UpdateProgessbar(ProgText):
+	progressbar.step(10)
+	ProgLabel.config(text = ProgText)
+	prog.update()
+	
 def MyRoi(RoiName, RoiColor, RoiType, RoiThreshold, Plan, PlanDose):
 	try: 
 		roi = case.PatientModel.CreateRoi(Name = RoiName, Color = RoiColor, Type = RoiType)
@@ -100,6 +105,24 @@ class ComboboxSelectionWindow():
 
 EP=ComboboxSelection() #PET examination's name
 
+
+prog = tk.Tk()
+w=350
+h=120
+screen_width = int(prog.winfo_screenwidth()/2-(w/2))
+screen_height = int(prog.winfo_screenheight()/2-(h/2))
+geo=str(str(w)+'x'+str(h)+'+'+str(screen_width)+'+'+str(screen_height))
+prog.title("Progress")
+progressbar = ttk.Progressbar(length=280)
+progressbar.place(x=30, y=50)
+prog.attributes("-topmost", True)
+prog.geometry(geo)
+ProgText="Running script..."
+ProgLabel = tk.Label(prog,text = ProgText)
+ProgLabel.pack()
+ProgLabel.place(x = 80, y = 20, width=200, height=20)
+UpdateProgessbar("Running script...")
+
 with CompositeAction("Get the plans that use the PET and SPECT examinations"):
 	PlanNames = case.TreatmentPlans._ 
 	nPlan = len(PlanNames.split()) 
@@ -112,7 +135,8 @@ with CompositeAction("Get the plans that use the PET and SPECT examinations"):
 			BeamSetS=case.TreatmentPlans[ex]#SPECT BeamSet
 		elif(EP in beam):
 			BeamSetP=case.TreatmentPlans[ex]#SPECT BeamSet
-	
+
+UpdateProgessbar("Copy plans")	
 with CompositeAction("Check that the 'Scaled' plans do not already exist"):
 	PS='SPECT Scaled'
 	PSExists=0
@@ -132,6 +156,7 @@ with CompositeAction("Copy the plans"):
 	if (PPExists==0):#"PET Scaled" doesn't exist
 		case.CopyPlan(PlanName=BeamSetP.Name, NewPlanName=PP, KeepBeamSetNames=False)
 
+UpdateProgessbar("Creating external ROIs")
 with CompositeAction('Create external ROIs for each plan'):
 	# SPECT
 	try:
@@ -153,6 +178,7 @@ with CompositeAction('Create external ROIs for each plan'):
 case.TreatmentPlans[PS].TreatmentCourse.TotalDose.UpdateDoseGridStructures()
 case.TreatmentPlans[PP].TreatmentCourse.TotalDose.UpdateDoseGridStructures()
 
+UpdateProgessbar("Normalizing dose maps...")
 with CompositeAction('Normalize the dose maps to the maximum value'):
 	#  SPECT
 	if (PSExists==0):
@@ -177,7 +203,8 @@ with CompositeAction('Check if a frame of reference between the SPECT and PET ex
 		grid=case.StructureRegistrations[fo].DeformationGrid.FrameOfReference #Defomaion grid corresponding to a deformable registration
 		if(fromname==ES and toname==EP and grid==""):#The last condition ensures that only the 'Source registration' registrations are picked
 			FORIndex=fo # Frame of reference index. If the FoR doesn't already exist, the index value will be -1	
-			
+
+UpdateProgessbar("Performing image registration")			
 with CompositeAction('Create a rigid registration if necessary'):		
 	if(FORIndex==-1):
 		case.CreateNamedIdentityFrameOfReferenceRegistration(FromExaminationName=EP, ToExaminationName=ES, RegistrationName="FoR PET to SPECT", \
@@ -200,6 +227,7 @@ with CompositeAction('Check for radioembolization deformable registrations (DefR
 			break
 		gr+=1
 
+UpdateProgessbar('Creating a deformable registration...')
 with CompositeAction('Create a deformable regristration with a new index'):	
 	GrName=str("DefRegRadioembolization")
 	DefName=str("DefRegRadioembolization1")
@@ -212,7 +240,6 @@ with CompositeAction('Create a deformable regristration with a new index'):
 		'InitialGridRegularizationWeight': 400, 'FinalGridRegularizationWeight': 400, 'ControllingRoiWeight': 0.5, 'ControllingPoiWeight': 0.1, \
 		'MaxNumberOfIterationsPerResolutionLevel': 1000, 'ImageSimilarityMeasure': "MutualInformation", 'DeformationStrategy': "Default", \
 		'ConvergenceTolerance': 1E-05 })
-
 
 
 with CompositeAction('Find the deformed PET dose map index'):
@@ -247,7 +274,7 @@ with CompositeAction('Find the deformed PET dose map index'):
 			ev+=1
 		ex += 1	
 
-
+UpdateProgessbar('Deforming PET dose map')
 with CompositeAction("Deform PET's dose map"):
 	if DoseEvPlanExists ==-1: 
 		# Deform the "PET Scaled" dose map using the deformation registration
@@ -261,6 +288,7 @@ with CompositeAction("Deform PET's dose map"):
 case.TreatmentPlans[PS].TreatmentCourse.TotalDose.UpdateDoseGridStructures()
 case.TreatmentPlans[PP].TreatmentCourse.TotalDose.UpdateDoseGridStructures()
 
+UpdateProgessbar('Creating ROIs...')
 with CompositeAction('Create the PET and SPECT threshold dose ROIs'):
 	examination=case.Examinations[ES] 
 	plan=case.TreatmentPlans[PS]
@@ -297,7 +325,8 @@ with CompositeAction('Create the PET and SPECT threshold dose ROIs'):
 		roi_nonover=str(j)+' non over.'
 		AlgebraRoi(RoiName=roi_nonover, RoiA=roi_pet, RoiB=roi_spect, AlgebraOperation="Subtraction", \
 		RoiColor="Red", RoiType="Control", RoiExamination=examination)
-		
+
+UpdateProgessbar('Image registration verification...')
 with CompositeAction('Image registration verification'):
 # Verify that the Jacobian determinant of the transformation matrix at each voxel verifies the aceptability condition (det(J)>0)
 	m=case.StructureRegistrations[DefName].ComputeJacobianDeterminantForROI(RoiName="External PET")
@@ -306,6 +335,7 @@ with CompositeAction('Image registration verification'):
 	for i in range(0,max,1):
 		if (m[i]<0):
 			invalid=invalid+1
+	UpdateProgessbar('Image registration verification...')
 	def ok():
 		root.destroy()
 	if invalid==0:	
@@ -315,6 +345,9 @@ with CompositeAction('Image registration verification'):
 		texto=str("\nTotal numbers of voxels: "+str(max)\
 		+"\n \nInvalid voxels (Jacobian determinant < 0): "+str(invalid)+"\n\nThe image registration is NOT valid\n")
 	
+	
+	UpdateProgessbar('Image registration finished')
+	prog.destroy()
 	root = Tk()
 	w=350
 	h=160
