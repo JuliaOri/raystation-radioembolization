@@ -50,8 +50,8 @@ def ComboboxSelection():
 	app.attributes("-topmost", True)
 	Selection=ComboboxSelectionWindow(app)
 	app.mainloop()
-
-    return Selection.comboBox_example_contents
+	
+	return Selection.comboBox_example_contents
     
 class ComboboxSelectionWindow():
     def __init__(self, master):
@@ -275,11 +275,11 @@ with CompositeAction('Create the PET and SPECT threshold dose ROIs'):
 	for j in range(initial,final,step):
 		threshold_level =j*100
 		# PET # The voxel dose values are multiplied by 100. Thus, the threshold dose vaues must be multiplied by 100
-		roi_pet = str(str(j)+"P")
+		roi_pet = str(str(j)+" PET")
 		MyRoi(RoiName=roi_pet, RoiColor='Green', RoiType= 'Control', RoiThreshold=threshold_level*NormPetDose,Plan=PS, PlanDose=plan_dose_pet)
 
 		#SPECT
-		roi_spect = str(str(j)+"S")
+		roi_spect = str(str(j)+" SPECT")
 		MyRoi(RoiName=roi_spect, RoiColor='Blue', RoiType='Control', RoiThreshold=threshold_level, Plan=PS, PlanDose=plan_dose_spect)
 		
 		# Overlapping volume
