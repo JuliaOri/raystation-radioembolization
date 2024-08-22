@@ -349,7 +349,9 @@ with CompositeAction('Image registration verification'):
 		texto=str("\nTotal numbers of voxels: "+str(max)\
 		+"\n \nInvalid voxels (Jacobian determinant < 0): "+str(invalid)+"\n\nThe image registration is NOT valid\n")
 	
-	
+	def ok():
+		ver.destroy()
+		
 	UpdateProgessbar('Image registration finished')
 	prog.destroy()
 	ver = tk.Tk()
