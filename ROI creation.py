@@ -269,7 +269,7 @@ with CompositeAction('Create the PET and SPECT threshold dose ROIs'):
 			name_over=str(j)+' over.'
 			name_s=str(str(j)+"S")
 			name_p=str(str(j)+"P")		
-			roi_int = case.PatientModel.CreateRoi(Name=name_over, Color="White", Type="Organ", TissueName=None, RbeCellTypeName=None, RoiMaterial=None)
+			roi_int = case.PatientModel.CreateRoi(Name=name_over, Color="White", Type="Control", TissueName=None, RbeCellTypeName=None, RoiMaterial=None)
 			# The type of operation is called "Intersection"		
 			roi_int.SetAlgebraExpression(\
 			ExpressionA={ 'Operation': "Union", 'SourceRoiNames': [name_p], 'MarginSettings': { 'Type': "Expand", 'Superior': 0, \
@@ -287,7 +287,7 @@ with CompositeAction('Create the PET and SPECT threshold dose ROIs'):
 		# Non-overlapping ROIs
 		try:
 			name_subs=str(str(j)+" non over.")
-			roi_np = case.PatientModel.CreateRoi(Name=name_subs, Color="Red", Type="Organ", TissueName=None, RbeCellTypeName=None, RoiMaterial=None)
+			roi_np = case.PatientModel.CreateRoi(Name=name_subs, Color="Red", Type="Control", TissueName=None, RbeCellTypeName=None, RoiMaterial=None)
 	   
 			# The type of operation is called "Substraction". Expression B (SPECT) is substracted from expression A (PET)
 			roi_np.SetAlgebraExpression(\
