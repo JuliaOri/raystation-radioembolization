@@ -69,14 +69,13 @@ with CompositeAction('SPECT ROIs'):
 	for j in range(initial,final,step):
 	
 		try:
-			c=str(j)+'S'
+			c=str(j)+' SPECT'
 			# The results are rounded to the second decimal place
 			vol_val=str(round(plan.BeamSets[0].GetStructureSet().RoiGeometries[c].GetRoiVolume(),2))
 			volv=volv+(vol_val,)
 			dose=str(round(plan_dose.GetDoseStatistic(RoiName=c, DoseType="Average")/100,2))
 			# The dose value stored in the map has cGy units
 			av_dosev=av_dosev+(dose,)
-		
 		
 		except:
 			volv=volv+("-",)
@@ -91,7 +90,7 @@ with CompositeAction('PET ROIs'):
 		
 		try:#para que ignore los errores si hay algún valor vacío (especialmente si no existe coiincidencia entre la ROI prescrita y la administrada)
 		
-			c=str(j)+'P'
+			c=str(j)+' PET'
 			vol_val=str(round(plan.BeamSets[0].GetStructureSet().RoiGeometries[c].GetRoiVolume(),2))
 			volv=volv+(vol_val,)
 			dose=str(round(plan_dose.GetDoseStatistic(RoiName=c, DoseType="Average")/100,2))
