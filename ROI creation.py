@@ -105,23 +105,23 @@ class ComboboxSelectionWindow():
 
 EP=ComboboxSelection() #PET examination's name
 
+with CompositeAction("Progress window"):
 
-prog = tk.Tk()
-w=350
-h=120
-screen_width = int(prog.winfo_screenwidth()/2-(w/2))
-screen_height = int(prog.winfo_screenheight()/2-(h/2))
-geo=str(str(w)+'x'+str(h)+'+'+str(screen_width)+'+'+str(screen_height))
-prog.title("Progress")
-progressbar = ttk.Progressbar(length=280)
-progressbar.place(x=30, y=50)
-prog.attributes("-topmost", True)
-prog.geometry(geo)
-ProgText="Running script..."
-ProgLabel = tk.Label(prog,text = ProgText)
-ProgLabel.pack()
-ProgLabel.place(x = 80, y = 20, width=200, height=20)
-UpdateProgessbar("Running script...")
+	prog = tk.Tk()
+	w=350
+	h=120
+	screen_width = int(prog.winfo_screenwidth()/2-(w/2))
+	screen_height = int(prog.winfo_screenheight()/2-(h/2))
+	geo=str(str(w)+'x'+str(h)+'+'+str(screen_width)+'+'+str(screen_height))
+	prog.title("Progress")
+	prog.attributes("-topmost", True)
+	prog.geometry(geo)
+	ProgText="Running script..."
+	ProgLabel = tk.Label(prog,text = ProgText,justify="center")
+	ProgLabel.pack(pady=15, padx=30, anchor="w")
+	progressbar = ttk.Progressbar(length=280)
+	progressbar.pack(pady=10, padx=30, anchor="w")
+	UpdateProgessbar("Running script...")
 
 with CompositeAction("Get the plans that use the PET and SPECT examinations"):
 	PlanNames = case.TreatmentPlans._ 
