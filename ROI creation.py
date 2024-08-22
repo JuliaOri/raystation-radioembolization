@@ -136,7 +136,7 @@ with CompositeAction("Get the plans that use the PET and SPECT examinations"):
 		elif(EP in beam):
 			BeamSetP=case.TreatmentPlans[ex]#SPECT BeamSet
 
-UpdateProgessbar("Copy plans")	
+UpdateProgessbar("Copying plans...")	
 with CompositeAction("Check that the 'Scaled' plans do not already exist"):
 	PS='SPECT Scaled'
 	PSExists=0
@@ -156,7 +156,7 @@ with CompositeAction("Copy the plans"):
 	if (PPExists==0):#"PET Scaled" doesn't exist
 		case.CopyPlan(PlanName=BeamSetP.Name, NewPlanName=PP, KeepBeamSetNames=False)
 
-UpdateProgessbar("Creating external ROIs")
+UpdateProgessbar("Creating external ROIs...")
 with CompositeAction('Create external ROIs for each plan'):
 	# SPECT
 	try:
@@ -204,7 +204,7 @@ with CompositeAction('Check if a frame of reference between the SPECT and PET ex
 		if(fromname==ES and toname==EP and grid==""):#The last condition ensures that only the 'Source registration' registrations are picked
 			FORIndex=fo # Frame of reference index. If the FoR doesn't already exist, the index value will be -1	
 
-UpdateProgessbar("Performing image registration")			
+UpdateProgessbar("Performing image rigid registration...")			
 with CompositeAction('Create a rigid registration if necessary'):		
 	if(FORIndex==-1):
 		case.CreateNamedIdentityFrameOfReferenceRegistration(FromExaminationName=EP, ToExaminationName=ES, RegistrationName="FoR PET to SPECT", \
@@ -227,7 +227,7 @@ with CompositeAction('Check for radioembolization deformable registrations (DefR
 			break
 		gr+=1
 
-UpdateProgessbar('Creating a deformable registration...')
+UpdateProgessbar('Performing a deformable registration...')
 with CompositeAction('Create a deformable regristration with a new index'):	
 	GrName=str("DefRegRadioembolization")
 	DefName=str("DefRegRadioembolization1")
@@ -274,7 +274,7 @@ with CompositeAction('Find the deformed PET dose map index'):
 			ev+=1
 		ex += 1	
 
-UpdateProgessbar('Deforming PET dose map')
+UpdateProgessbar('Deforming PET dose map...')
 with CompositeAction("Deform PET's dose map"):
 	if DoseEvPlanExists ==-1: 
 		# Deform the "PET Scaled" dose map using the deformation registration
