@@ -44,11 +44,12 @@ for i in range(0,nEx):
 
 # The following windows allow for SPECT and PET image (examination) selection	
 def ComboboxSelection():
-    app = tk.Tk()
-    app.title("Select the examinations")
-    app.geometry('350x120')
-    Selection=ComboboxSelectionWindow(app)
-    app.mainloop()
+	app = tk.Tk()
+	app.title("Select the examinations")
+	app.geometry('350x120')
+	app.attributes("-topmost", True)
+	Selection=ComboboxSelectionWindow(app)
+	app.mainloop()
 
     return Selection.comboBox_example_contents
     
@@ -311,6 +312,7 @@ with CompositeAction('Image registration verification'):
 	root = Tk()
 	root.geometry('350x160')
 	root.title("Image verification")
+	root.attributes("-topmost", True)
 	var = StringVar()
 	label = Message(root, textvariable=var,width=700)
 	var.set(texto)
