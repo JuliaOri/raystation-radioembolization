@@ -6,20 +6,20 @@ from tkinter import *
 import tkinter as tk
 from connect import *
 
-def MyRoi(name, rcolor, rtype, plan, threshold, dose):
+def MyRoi(RoiName, RoiColor, RoiType, RoiThreshold, Plan, PlanDose):
 	try: 
-		roi = case.PatientModel.CreateRoi(Name = name, Color = rcolor, Type = rtype)
-		roi.CreateRoiGeometryFromDose(DoseDistribution = dose, \
-		ThresholdLevel = threshold)
+		roi = case.PatientModel.CreateRoi(Name = RoiName, Color = RoiColor, Type = RoiType)
+		roi.CreateRoiGeometryFromDose(DoseDistribution = PlanDose, \
+		ThresholdLevel = RoiThreshold)
 	
 	except:
-		print(str(name+" ROI already exists"))
+		print(str(RoiName+" ROI already exists"))
 	
-	case.TreatmentPlans[plan].TreatmentCourse.TotalDose.UpdateDoseGridStructures()
+	case.TreatmentPlans[Plan].TreatmentCourse.TotalDose.UpdateDoseGridStructures()
 
-def AlgebraRoi(name, RoiA, RoiB, operation, rcolor, rtype, examination):
+def AlgebraRoi(RoiName, RoiA, RoiB, AlgebraOperation, RoiColor, RoiType, RoiExamination):
 		try:		
-			roi_int = case.PatientModel.CreateRoi(Name=name, Color=rcolor, Type=rtype, TissueName=None, RbeCellTypeName=None, RoiMaterial=None)
+			roi_int = case.PatientModel.CreateRoi(Name=RoiName, Color=RoiColor, Type=RoiType, TissueName=None, RbeCellTypeName=None, RoiMaterial=None)
 			# The type of operation is called "Intersection"		
 			roi_int.SetAlgebraExpression(\
 			ExpressionA={ 'Operation': "Union", 'SourceRoiNames': [RoiA], 'MarginSettings': { 'Type': "Expand", 'Superior': 0, \
@@ -28,12 +28,12 @@ def AlgebraRoi(name, RoiA, RoiB, operation, rcolor, rtype, examination):
 			ExpressionB={ 'Operation': "Union", 'SourceRoiNames': [RoiB], 'MarginSettings': { 'Type': "Expand", 'Superior': 0, \
 			'Inferior': 0, 'Anterior': 0, 'Posterior': 0, 'Right': 0, 'Left': 0 } }, \
 	   
-			ResultOperation=operation, ResultMarginSettings={ 'Type': "Expand", 'Superior': 0, 'Inferior': 0, 'Anterior': 0, \
+			ResultOperation=AlgebraOperation, ResultMarginSettings={ 'Type': "Expand", 'Superior': 0, 'Inferior': 0, 'Anterior': 0, \
 			'Posterior': 0, 'Right': 0, 'Left': 0 })
 			
-			roi_int.UpdateDerivedGeometry(Examination=examination, Algorithm="Auto")
+			roi_int.UpdateDerivedGeometry(Examination=RoiExamination, Algorithm="Auto")
 		except:
-			print(str(operation+' ROI already exists'))
+			print(str(AlgebraOperation+' '+RoiName+' ROI already exists'))
 
 case=get_current("Case")
 ExNames=case.Examinations._ #List all the examinations
@@ -44,13 +44,14 @@ for i in range(0,nEx):
 
 # The following windows allow for SPECT and PET image (examination) selection	
 def ComboboxSelection():
-    app = tk.Tk()
-    app.title("Select the examinations")
-    app.geometry('350x120')
-    Selection=ComboboxSelectionWindow(app)
-    app.mainloop()
-
-    return Selection.comboBox_example_contents
+	app = tk.Tk()
+	app.title("Select the examinations")
+	app.geometry('350x120')
+	app.attributes("-topmost", True)
+	Selection=ComboboxSelectionWindow(app)
+	app.mainloop()
+	
+	return Selection.comboBox_example_contents
     
 class ComboboxSelectionWindow():
     def __init__(self, master):
@@ -274,20 +275,22 @@ with CompositeAction('Create the PET and SPECT threshold dose ROIs'):
 	for j in range(initial,final,step):
 		threshold_level =j*100
 		# PET # The voxel dose values are multiplied by 100. Thus, the threshold dose vaues must be multiplied by 100
-		roi_pet = str(str(j)+"P")
-		MyRoi(roi_pet, 'Green', 'Control', PS, threshold_level*NormPetDose, plan_dose_pet)
-		
+		roi_pet = str(str(j)+" PET")
+		MyRoi(RoiName=roi_pet, RoiColor='Green', RoiType= 'Control', RoiThreshold=threshold_level*NormPetDose,Plan=PS, PlanDose=plan_dose_pet)
+
 		#SPECT
-		roi_spect = str(str(j)+"S")
-		MyRoi(roi_spect, 'Blue', 'Control', PS, threshold_level, plan_dose_spect)
+		roi_spect = str(str(j)+" SPECT")
+		MyRoi(RoiName=roi_spect, RoiColor='Blue', RoiType='Control', RoiThreshold=threshold_level, Plan=PS, PlanDose=plan_dose_spect)
 		
 		# Overlapping volume
 		roi_over=str(j)+' over.'
-		AlgebraRoi(roi_over, roi_pet, roi_spect, "Intersection", "White", "Control", examination)
-		
+		AlgebraRoi(RoiName=roi_over, RoiA=roi_pet, RoiB=roi_spect, AlgebraOperation="Intersection", \
+		RoiColor="White", RoiType="Control", RoiExamination=examination)
+
 		# Non-overlapping volume
 		roi_nonover=str(j)+' non over.'
-		AlgebraRoi(roi_nonover, roi_pet, roi_spect, "Subtraction", "Red", "Control", examination)
+		AlgebraRoi(RoiName=roi_nonover, RoiA=roi_pet, RoiB=roi_spect, AlgebraOperation="Subtraction", \
+		RoiColor="Red", RoiType="Control", RoiExamination=examination)
 		
 with CompositeAction('Image registration verification'):
 # Verify that the Jacobian determinant of the transformation matrix at each voxel verifies the aceptability condition (det(J)>0)
@@ -309,6 +312,7 @@ with CompositeAction('Image registration verification'):
 	root = Tk()
 	root.geometry('350x160')
 	root.title("Image verification")
+	root.attributes("-topmost", True)
 	var = StringVar()
 	label = Message(root, textvariable=var,width=700)
 	var.set(texto)
