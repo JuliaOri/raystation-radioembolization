@@ -320,18 +320,20 @@ with CompositeAction('Image registration verification'):
 	def ok():
 		root.destroy()
 	if invalid==0:	
-		texto=str("Total numbers of voxels: "+str(max)+"\n \nInvalid voxels (Jacobian determinant < 0): "+str(invalid)+"\n\nThe image registration is valid")
+		texto=str("\nTotal numbers of voxels: "+str(max)\
+		+"\n \nInvalid voxels (Jacobian determinant < 0): "+str(invalid)+"\n\nThe image registration is valid\n")
 	elif invalid!=0:	
-		texto=str("Total numbers of voxels: "+str(max)+"\n \nInvalid voxels (Jacobian determinant < 0): "+str(invalid)+"\n\nThe image registration is NOT valid")
+		texto=str("\nTotal numbers of voxels: "+str(max)\
+		+"\n \nInvalid voxels (Jacobian determinant < 0): "+str(invalid)+"\n\nThe image registration is NOT valid\n")
 	
 	root = Tk()
-	root.geometry('350x140')
+	root.geometry('350x160')
 	root.title("Image verification")
 	var = StringVar()
 	label = Message(root, textvariable=var,width=700)
 	var.set(texto)
 	label.pack()
 	root.okButton = tk.Button(root, text='Close',command = ok)
-	root.okButton.place(x = 105, y = 140, width=140, height=25)
+	root.okButton.place(x = 105, y = 0, width=140, height=25)
 	root.okButton.pack()
 	root.mainloop()
