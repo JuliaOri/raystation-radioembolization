@@ -1,6 +1,5 @@
 from connect import *
 import warnings
-
 from tkinter import ttk
 from tkinter import *
 import tkinter as tk
