@@ -6,6 +6,35 @@ from tkinter import *
 import tkinter as tk
 from connect import *
 
+def MyRoi(name, rcolor, rtype, plan, threshold, dose):
+	try: 
+		roi = case.PatientModel.CreateRoi(Name = name, Color = rcolor, Type = rtype)
+		roi.CreateRoiGeometryFromDose(DoseDistribution = dose, \
+		ThresholdLevel = threshold)
+	
+	except:
+		print(str(name+" ROI already exists"))
+	
+	case.TreatmentPlans[plan].TreatmentCourse.TotalDose.UpdateDoseGridStructures()
+
+def AlgebraRoi(name, RoiA, RoiB, operation, rcolor, rtype, examination):
+		try:		
+			roi_int = case.PatientModel.CreateRoi(Name=name, Color=rcolor, Type=rtype, TissueName=None, RbeCellTypeName=None, RoiMaterial=None)
+			# The type of operation is called "Intersection"		
+			roi_int.SetAlgebraExpression(\
+			ExpressionA={ 'Operation': "Union", 'SourceRoiNames': [RoiA], 'MarginSettings': { 'Type': "Expand", 'Superior': 0, \
+			'Inferior': 0, 'Anterior': 0, 'Posterior': 0, 'Right': 0, 'Left': 0 } }, \
+	   
+			ExpressionB={ 'Operation': "Union", 'SourceRoiNames': [RoiB], 'MarginSettings': { 'Type': "Expand", 'Superior': 0, \
+			'Inferior': 0, 'Anterior': 0, 'Posterior': 0, 'Right': 0, 'Left': 0 } }, \
+	   
+			ResultOperation=operation, ResultMarginSettings={ 'Type': "Expand", 'Superior': 0, 'Inferior': 0, 'Anterior': 0, \
+			'Posterior': 0, 'Right': 0, 'Left': 0 })
+			
+			roi_int.UpdateDerivedGeometry(Examination=examination, Algorithm="Auto")
+		except:
+			print(str(operation+' ROI already exists'))
+
 case=get_current("Case")
 ExNames=case.Examinations._ #List all the examinations
 nEx = len(ExNames.split()) #Count the total number of examinations
@@ -229,9 +258,13 @@ with CompositeAction('Create the PET and SPECT threshold dose ROIs'):
 	examination=case.Examinations[ES] 
 	plan=case.TreatmentPlans[PS]
 	plan_dose_pet=case.TreatmentDelivery.FractionEvaluations[0].DoseOnExaminations[DoseOnExSPECTIndex].DoseEvaluations[DoseEvRembIndex]
+	plan_dose_spect=plan.TreatmentCourse.TotalDose
+	
 	# As the PET maximum dose value may change after the dose map is deformed, this will ensure the threshold values are normalized to 
 	# the new maximum value
-	dosemax=plan_dose_pet.GetDoseStatistic(RoiName="External PET", DoseType="Max")
+	dosemax=plan_dose_pet.GetDoseStatistic(RoiName="External PET", DoseType="Max")/100
+	NormPetDose=dosemax/100
+
 	# The created ROIs with range from 10 to 90% of the maximum dose, by steps of 10%
 	initial = 10
 	final = 100
@@ -239,75 +272,22 @@ with CompositeAction('Create the PET and SPECT threshold dose ROIs'):
 			
 with CompositeAction('Create the PET and SPECT threshold dose ROIs'):	
 	for j in range(initial,final,step):
-		try:
-			# The voxel dose values are multiplied by 100. Thus, the threshold dose vaues must be multiplied by 100
-			threshold_level =j*dosemax/100
-			# PET
-			roi_name = str(str(j)+"P")
-			roi = case.PatientModel.CreateRoi(Name = roi_name, Color = 'Green', Type = 'Control')
-			roi.CreateRoiGeometryFromDose(DoseDistribution = plan_dose_pet, \
-			ThresholdLevel = threshold_level)
-			case.TreatmentPlans[PS].TreatmentCourse.TotalDose.UpdateDoseGridStructures()
-			
-		except:
-			print("PET ROI already exists") 
-
-		# SPECT
-		try:
-			threshold_level =j*100
-			roi_name = str(str(j)+"S")
-			roi = case.PatientModel.CreateRoi(Name = roi_name, Color = 'Blue', Type = 'Control')
-			roi.CreateRoiGeometryFromDose(DoseDistribution = plan.TreatmentCourse.TotalDose, \
-			ThresholdLevel = threshold_level)
-			case.TreatmentPlans[PS].TreatmentCourse.TotalDose.UpdateDoseGridStructures()
-
-		except:
-			print("SPECT ROI already exists") 
-
-		# Overlapping ROIs
-		try:
-			name_over=str(j)+' over.'
-			name_s=str(str(j)+"S")
-			name_p=str(str(j)+"P")		
-			roi_int = case.PatientModel.CreateRoi(Name=name_over, Color="White", Type="Control", TissueName=None, RbeCellTypeName=None, RoiMaterial=None)
-			# The type of operation is called "Intersection"		
-			roi_int.SetAlgebraExpression(\
-			ExpressionA={ 'Operation': "Union", 'SourceRoiNames': [name_p], 'MarginSettings': { 'Type': "Expand", 'Superior': 0, \
-			'Inferior': 0, 'Anterior': 0, 'Posterior': 0, 'Right': 0, 'Left': 0 } }, \
-	   
-			ExpressionB={ 'Operation': "Union", 'SourceRoiNames': [name_s], 'MarginSettings': { 'Type': "Expand", 'Superior': 0, \
-			'Inferior': 0, 'Anterior': 0, 'Posterior': 0, 'Right': 0, 'Left': 0 } }, \
-	   
-			ResultOperation="Intersection", ResultMarginSettings={ 'Type': "Expand", 'Superior': 0, 'Inferior': 0, 'Anterior': 0, \
-			'Posterior': 0, 'Right': 0, 'Left': 0 })
-			roi_int.UpdateDerivedGeometry(Examination=examination, Algorithm="Auto")
-		except:
-			print('Overlapping ROI already exists')
+		threshold_level =j*100
+		# PET # The voxel dose values are multiplied by 100. Thus, the threshold dose vaues must be multiplied by 100
+		roi_pet = str(str(j)+"P")
+		MyRoi(roi_pet, 'Green', 'Control', PS, threshold_level*NormPetDose, plan_dose_pet)
 		
-		# Non-overlapping ROIs
-		try:
-			name_subs=str(str(j)+" non over.")
-			roi_np = case.PatientModel.CreateRoi(Name=name_subs, Color="Red", Type="Control", TissueName=None, RbeCellTypeName=None, RoiMaterial=None)
-	   
-			# The type of operation is called "Substraction". Expression B (SPECT) is substracted from expression A (PET)
-			roi_np.SetAlgebraExpression(\
-		   
-			ExpressionA={ 'Operation': "Union", 'SourceRoiNames': [name_p], 'MarginSettings': { 'Type': "Expand", 'Superior': 0, \
-			'Inferior': 0, 'Anterior': 0, 'Posterior': 0, 'Right': 0, 'Left': 0 } }, \
-			   
-			ExpressionB={ 'Operation': "Union", 'SourceRoiNames': [name_s], 'MarginSettings': { 'Type': "Expand", 'Superior': 0, \
-			'Inferior': 0, 'Anterior': 0, 'Posterior': 0, 'Right': 0, 'Left': 0 } }, \
-	   
-			ResultOperation="Subtraction", ResultMarginSettings={ 'Type': "Expand", 'Superior': 0, 'Inferior': 0, 'Anterior': 0, \
-			'Posterior': 0, 'Right': 0, 'Left': 0 })
-	   
-			roi_np.UpdateDerivedGeometry(Examination=examination, Algorithm="Auto")
-	  
-			
-		except:
-			print('Non-overlapping ROI already exists')
-			
-		plan.TreatmentCourse.TotalDose.UpdateDoseGridStructures()
+		#SPECT
+		roi_spect = str(str(j)+"S")
+		MyRoi(roi_spect, 'Blue', 'Control', PS, threshold_level, plan_dose_spect)
+		
+		# Overlapping volume
+		roi_over=str(j)+' over.'
+		AlgebraRoi(roi_over, roi_pet, roi_spect, "Intersection", "White", "Control", examination)
+		
+		# Non-overlapping volume
+		roi_nonover=str(j)+' non over.'
+		AlgebraRoi(roi_nonover, roi_pet, roi_spect, "Subtraction", "Red", "Control", examination)
 		
 with CompositeAction('Image registration verification'):
 # Verify that the Jacobian determinant of the transformation matrix at each voxel verifies the aceptability condition (det(J)>0)
