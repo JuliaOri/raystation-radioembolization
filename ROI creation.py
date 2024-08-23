@@ -44,15 +44,15 @@ for i in range(0,nEx):
 
 # The following windows allow for SPECT and PET image (examination) selection	
 def ComboboxSelection():
-
 	app = tk.Tk()
 	w=350
-	h=120
+	h=135
 	screen_width = int(app.winfo_screenwidth()/2-(w/2))
 	screen_height = int(app.winfo_screenheight()/2-(h/2))
 	app.title("Select the examinations")
 	geo=str(str(w)+'x'+str(h)+'+'+str(screen_width)+'+'+str(screen_height))
 	app.geometry(geo)
+	app.configure(background='grey')
 	app.attributes("-topmost", True)
 	app.overrideredirect(True)
 	Selection=ComboboxSelectionWindow(app)
@@ -61,43 +61,45 @@ def ComboboxSelection():
 	return Selection.comboBox_example_contents
     
 class ComboboxSelectionWindow():
-    def __init__(self, master):
-        self.master=master
-        self.entry_contents=None
-        self.labelTop = tk.Label(master,text = "Select the SPECT image")
-        self.labelTop.place(x = 20, y = 10, width=140, height=20)
-        self.comboBox_example = ttk.Combobox(master,values=Names,
-	    state="readonly",)
-        self.comboBox_example.current(0)
-        self.comboBox_example.place(x = 105, y = 35, width=140, height=25)
-
-        self.okButton = tk.Button(master, text='OK',command = self.callback)
-        self.okButton.place(x = 105, y = 70, width=140, height=25)
-
-    def callback(self):#get the contents of the Entry and exit
-        self.comboBox_example_contents=self.comboBox_example.get()
-        self.master.destroy()
+	def __init__(self, master):
+		self.master=master
+		self.entry_contents=None
+		
+		self.labelTop = tk.Label(master,text = "Select the SPECT image",fg='white',background='grey',font=(16),justify="center")
+		self.labelTop.place(x = 20, y = 15, width=180, height=20)
+		self.comboBox_example = ttk.Combobox(master,values=Names,
+		state="readonly",font=16)
+		self.comboBox_example.current(0)
+		self.comboBox_example.place(x = 105, y = 50, width=140, height=25)
+		
+		self.okButton = tk.Button(master, text='OK',command = self.callback)
+		self.okButton.place(x = 105, y = 90, width=140, height=25)
+	
+	def callback(self):#get the contents of the Entry and exit
+		self.comboBox_example_contents=self.comboBox_example.get()
+		self.master.destroy()
 
 ES=ComboboxSelection() # SPECT examination's name
 
 
 class ComboboxSelectionWindow():
-    def __init__(self, master):
-        self.master=master
-        self.entry_contents=None
-        self.labelTop = tk.Label(master,text = "Select the PET image")
-        self.labelTop.place(x = 20, y = 10, width=140, height=20)
-        self.comboBox_example = ttk.Combobox(master,values=Names,
-	    state="readonly",)
-        self.comboBox_example.current(0)
-        self.comboBox_example.place(x = 105, y = 35, width=140, height=25)
-
-        self.okButton = tk.Button(master, text='OK',command = self.callback)
-        self.okButton.place(x = 105, y = 70, width=140, height=25)
-
-    def callback(self):#get the contents of the Entry and exit
-        self.comboBox_example_contents=self.comboBox_example.get()
-        self.master.destroy()
+	def __init__(self, master):
+		self.master=master
+		self.entry_contents=None
+		self.labelTop = tk.Label(master,text = "Select the PET image",fg='white',background='grey',font=16,justify="center")
+		self.labelTop.place(x = 20, y = 15, width=180, height=20)
+		
+		self.comboBox_example = ttk.Combobox(master,values=Names,
+		state="readonly",font=16)
+		self.comboBox_example.current(0)
+		self.comboBox_example.place(x = 105, y = 50, width=140, height=25)
+		
+		self.okButton = tk.Button(master, text='OK',command = self.callback)
+		self.okButton.place(x = 105, y = 90, width=140, height=25)
+	
+	def callback(self):#get the contents of the Entry and exit
+		self.comboBox_example_contents=self.comboBox_example.get()
+		self.master.destroy()
 
 EP=ComboboxSelection() #PET examination's name
 
@@ -113,19 +115,17 @@ with CompositeAction("Progress window"):
 	screen_width = int(prog.winfo_screenwidth()/2-(w/2))
 	screen_height = int(prog.winfo_screenheight()/2-(h/2))
 	geo=str(str(w)+'x'+str(h)+'+'+str(screen_width)+'+'+str(screen_height))
-	prog.title("Progress")
 	prog.attributes("-topmost", True)
 	prog.overrideredirect(True)
-	#prog.attributes("-alpha", 0.6)
+	prog.attributes("-alpha", 0.8)
 	prog.geometry(geo)
+	prog.configure(background='grey')
 	ProgText="Running script..."
-	ProgLabel = tk.Label(prog,text = ProgText,justify="center")
+	ProgLabel = tk.Label(prog,text = ProgText,justify="center",background='grey', font=16,fg='white')
 	ProgLabel.pack(pady=20, padx=30, anchor="w")
 	progressbar = ttk.Progressbar(length=280)
 	progressbar.pack(pady=5, padx=30, anchor="w")
 	UpdateProgessbar("Running script...")
-	
-
 
 with CompositeAction("Get the plans that use the PET and SPECT examinations"):
 	PlanNames = case.TreatmentPlans._ 
@@ -352,22 +352,26 @@ with CompositeAction('Image registration verification'):
 	def ok():
 		ver.destroy()
 		
+with CompositeAction('Image registration window'):
 	UpdateProgessbar('Image registration finished')
 	prog.destroy()
 	ver = tk.Tk()
 	w=350
-	h=160
+	h=180
 	screen_width = int(ver.winfo_screenwidth()/2-(w/2))
 	screen_height = int(ver.winfo_screenheight()/2-(h/2))
 	geo=str(str(w)+'x'+str(h)+'+'+str(screen_width)+'+'+str(screen_height))
 	ver.geometry(geo)
-	ver.title("Image verification")
 	ver.attributes("-topmost", True)
+	ver.overrideredirect(True)
+	ver.configure(background='grey')
 	var = StringVar()
-	label = Message(ver, textvariable=var,width=700)
+	
+	label = Message(ver, textvariable=var,width=700,justify="left",background='grey', font=16,fg='white')
 	var.set(texto)
 	label.pack()
-	ver.okButton = tk.Button(ver, text='Close',command = ok)
-	ver.okButton.place(x = 105, y = 0, width=140, height=25)
+	
+	ver.okButton = tk.Button(ver, text='Close',command = ok,font=16)
+	ver.okButton.place(x = 105, y = 0, width=150, height=25)
 	ver.okButton.pack()
 	ver.mainloop()
