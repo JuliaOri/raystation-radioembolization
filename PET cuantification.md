@@ -16,10 +16,10 @@ $$D=\frac{E_{\text{total, Y-90}}}{\rho}$$
 where $\rho = 1.03\text{kg/l}$ is the liver's average density.
 
 The total energy per voxel will be 
-
-$$latex E_{\text{total, Y-90}} =\overline{E}_{Y-90} \cdot N_0 = \overline{E_{Y-90}} \cdot A_0\cdot \frac{T_{1/2}}{\ln 2}$$
-
+´´´math
+E_{\text{total, Y-90}} =\overline{E}_{Y-90} \cdot N_0 = \overline{E_{Y-90}} \cdot A_0\cdot \frac{T_{1/2}}{\ln 2}
+´´´
 Finally, given that the total number of administered nuclei per voxel can be calculated as $N_0=A_0\cdot \frac{T_{1/2}}{\ln2}$, the total absorbed dose per voxel will be
 
-$$D = \frac{E_{\text{total, Y-90}}}{\rho}= \overline{E}_{Y-90} \cdot \underbrace{A_0}_{A_t\cdot F_d}\cdot \frac{T_{1/2}}{\ln 2} \cdot \frac{1}{\rho}$$
+$$D = \frac{E_{\text{total, Y-90}}}{\rho}= \overline{E} _{Y-90} \cdot \underbrace{A_0}_{A_t\cdot F_d}\cdot \frac{T_{1/2}}{\ln 2} \cdot \frac{1}{\rho}$$
 
