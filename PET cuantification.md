@@ -20,12 +20,7 @@ The total energy per voxel will be
 E_{\text{total, Y-90}} =\overline{E}_{Y-90} \cdot N_0 = \overline{E}_{Y-90} \cdot A_0\cdot \frac{T_{1/2}}{\ln 2}
 ```
 
-#Finally, given that the total number of administered nuclei per voxel can be calculated as $N_0=A_0\cdot \frac{T_{1/2}}{\ln2}$, the total absorbed dose per voxel will be
-#```math
-#D = \frac{\overbrace{E_{\text{total, Y-90}}}^{\overline{E}_{Y-90} \cdot A_0\cdot \frac{T_{1/2}}{\ln 2}}}{\rho}
-#= \overline{E}_{Y-90} \cdot \underbrace{A_0}_{A_t\cdot F_d}\cdot \frac{T_{1/2}}{\ln 2} \cdot \frac{1}{\rho}=\overline{E}_{Y-90} \cdot A_t\cdot F_d\cdot \frac{T_{1/2}}{\ln 2} \cdot \frac{1}#{\rho}=A_t\cdot\left[\overline{E}_{Y-90} \cdot  F_d\cdot \frac{T_{1/2}}{\ln 2} \cdot \frac{1}{\rho}\right]=A_t\cdot F_\text{cPET}
-#```
-
+Finally, given that the total number of administered nuclei per voxel can be calculated as $N_0=A_0\cdot \frac{T_{1/2}}{\ln2}$, the total absorbed dose per voxel will be
 ```math
 \begin{flalign}
 D &= \frac{{E_{\text{total, Y-90}}}}{\rho}&\\
