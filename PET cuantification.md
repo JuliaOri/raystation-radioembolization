@@ -17,4 +17,4 @@ where $\rho = 1.03\text{kg/l}$ is the liver's average density.
 
 Finally, given that the total number of administered nuclei per voxel can be calculated as $N_0=A_0\cdot \frac{T_{1/2}}{\ln2}$, the total absorbed dose per voxel will be
 
-$$D= A_t \cdot \frac{\overline{E}_{Y-90}}{\rho} \cdot F_d\cdot \frac{T_{1/2}}{\ln 2}=A_t\cdot F_{\text{cPET}}$$
+$$D= A_t \cdot \frac{E_{\text{Y-90}}}{\rho} \cdot F_d\cdot \frac{T_{1/2}}{\ln 2}=A_t\cdot F_{\text{cPET}}$$
