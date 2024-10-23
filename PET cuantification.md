@@ -31,5 +31,5 @@ D &= \frac{{E_{\text{total, Y-90}}}}{\rho}&\\
 ```
 Thus, the PET correction factor $F_\text{cPET}$ that transforms measured activity per voxel into absorbed dose is
 ```math
-F_\text{cPET}= \overline{E}_{Y-90} \cdot  F_d\cdot \frac{T_{1/2}}{\ln 2} \cdot \frac{1}{\rho}\right
+F_\text{cPET}= \overline{E}_{Y-90} \cdot  F_d\cdot \frac{T_{1/2}}{\ln 2} \cdot \frac{1}{\rho}
 ```
