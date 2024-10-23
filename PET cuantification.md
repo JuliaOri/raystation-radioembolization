@@ -21,9 +21,7 @@ E_{\text{total, Y-90}} =\overline{E}_{Y-90} \cdot N_0 = \overline{E}_{Y-90} \cdo
 ```
 
 Finally, given that the total number of administered nuclei per voxel can be calculated as $N_0=A_0\cdot \frac{T_{1/2}}{\ln2}$, the total absorbed dose per voxel will be
-
-$$D = \frac{E_{\text{total, Y-90}}}{\rho}= \overline{E} _{Y-90} \cdot \underbrace{A_0}_{A_t\cdot F_d}\cdot \frac{T_{1/2}}{\ln 2} \cdot \frac{1}{\rho}$$
-
 ```math
-\left( \sum_{k=1}^n a_k b_k \right)^2 \leq \left( \sum_{k=1}^n a_k^2 \right) \left( \sum_{k=1}^n b_k^2 \right)
+D = \frac{E_{\text{total, Y-90}}}{\rho}= \overline{E}_{Y-90} \cdot \underbrace{A_0}_{A_t\cdot F_d}\cdot \frac{T_{1/2}}{\ln 2} \cdot \frac{1}{\rho}
 ```
+
